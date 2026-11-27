@@ -496,6 +496,12 @@ CLI commands that exited with an error, and focus changes that AeroSpork made on
 Never use it for each refresh or each window. **Reason.** It is unconditional, and the unified log
 keeps every record.
 
+`WindowLossDiagnostics` (`util/WindowLossDiagnostics.swift`) writes to `session` for one bug: live
+windows collected together, typically when the display sleeps and the screen locks, and not detected
+again. It records a refresh that collects two or more windows (what each app listed, which apps timed
+out, the frontmost app), each of those windows when it comes back, and a summary 10 s after a wake or
+an unlock. One window closing records nothing. **Test.** `WindowLossDiagnosticsTest`.
+
 **`debugLog`** (`Common/util/commonUtil.swift`) is the verbose trace. It writes at `.debug`, which the
 unified log does not keep, so the records exist only for a `log stream` that is already running. It
 is safe anywhere, including hot paths.

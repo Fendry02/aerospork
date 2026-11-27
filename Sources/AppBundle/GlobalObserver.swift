@@ -110,6 +110,11 @@ class GlobalObserver {
         runRefreshSession(.globalObserver(reason), screenIsDefinitelyUnlocked: screenIsDefinitelyUnlocked)
         scheduleFollowUpRefresh(after: 2, "\(reason)FollowUp")
         scheduleFollowUpRefresh(after: 6, "\(reason)FollowUp")
+        // After the last follow-up has had time to run: did the refreshes happen, and did they help.
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(10))
+            WindowLossDiagnostics.summary(after: reason)
+        }
     }
 
     // DisplayLink docks fire didChangeScreenParametersNotification in bursts during a single

@@ -169,10 +169,10 @@ private func refresh() async throws {
     // Set, not Array: this is membership-tested once per window below, so an Array made it O(W^2).
     let aliveWindowIds = Set(mapping.values.flatMap { $0 })
 
-    for window in MacWindow.allWindows {
-        if !aliveWindowIds.contains(window.windowId) {
-            window.garbageCollect(skipClosedWindowsCache: false)
-        }
+    let dead = MacWindow.allWindows.filter { !aliveWindowIds.contains($0.windowId) }
+    WindowLossDiagnostics.noteCollected(dead, listedByApp: mapping, frontmostBundleId: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+    for window in dead {
+        window.garbageCollect(skipClosedWindowsCache: false)
     }
     for (app, windowIds) in mapping {
         for windowId in windowIds {
@@ -181,6 +181,8 @@ private func refresh() async throws {
             }
         }
     }
+
+    WindowLossDiagnostics.noteWindowsBack()
 
     // Only now. A selected tab that died above handed its tile on by what this said last time.
     backgroundTabs = currentBackgroundTabs()
