@@ -70,7 +70,8 @@ else is installed. It links each tool in this table into `.deps/bin` when it fin
 | `generate.sh` | Regenerates the `*Generated.swift` files and `aerospork.xcodeproj`. `--ignore-xcodeproj` skips the project. `--all` regenerates everything. | — |
 | `build-docs.sh` | Builds the site and the man pages from `docs/`. | `.site/`, `.man/` |
 | `build-shell-completion.sh` | Regenerates the completions from `grammar/commands-bnf-grammar.txt`. The output is in git. To try it, run `source ./shell-completion/zsh/_aerospork`. | `shell-completion/` |
-| `build-release.sh` | Builds the universal Release configuration with Xcode, signs it, and notarizes it when it can. `--build-version X.Y.Z` sets the version. | `.release/` |
+| `build-release.sh` | Builds the universal Release configuration with Xcode, signs it, and notarizes it when it can. `--build-version X.Y.Z` sets the version. `--app-only` skips the docs, the zip and the casks, and stops once the app is signed and checked. | `.release/` |
+| `install-local.sh` | Runs `build-release.sh --app-only`, replaces `/Applications/AeroSpork.app` with the result (the old copy goes to `.release/previous/`), links the CLI and relaunches the app. No Homebrew cask, so `brew upgrade` cannot replace it. `--dont-rebuild` skips the build. | — |
 | `install-from-sources.sh` | Runs `build-release.sh`, then installs the result as the `aerospork-dev` Homebrew cask. `--dont-rebuild` skips the build. | — |
 | `script/publish-release.sh` | Cuts a release. See [Cutting a release](#cutting-a-release). | — |
 | `script/deploy-site.sh` | Deploys `updates-site/` and `.site/` to the hosted site. `publish-release.sh` calls it. | — |

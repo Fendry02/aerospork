@@ -9,10 +9,14 @@ build_version="0.0.0-SNAPSHOT"
 # never existed in any keychain -- so a plain `./build-release.sh` built everything and then died at
 # the CLI signing step with "no identity found", after ~10 minutes of work.
 codesign_identity=""
+# --app-only: build, sign and check .release/AeroSpork.app, then stop. No docs (they need the Ruby
+# that .ruby-version pins), no zip and no casks: what install-local.sh needs, and nothing it doesn't.
+app_only=""
 while test $# -gt 0; do
     case $1 in
         --build-version) build_version="$2"; shift 2;;
         --codesign-identity) codesign_identity="$2"; shift 2;;
+        --app-only) app_only=1; shift ;;
         *) echo "Unknown option $1" > /dev/stderr; exit 1 ;;
     esac
 done
@@ -57,7 +61,7 @@ EOF
 ### BUILD ###
 #############
 
-./build-docs.sh
+if test -z "$app_only"; then ./build-docs.sh; fi
 # Shell completions are vendored in ./shell-completion (see build-shell-completion.sh). Building
 # them here required complgen/rust, fish and bash >= 5, which broke the release on a stock macOS.
 
@@ -354,6 +358,11 @@ notarize .release/AeroSpork.app
 # The standalone .release/aerospork is deliberately NOT notarized separately. It is the same binary
 # that was embedded at Contents/MacOS/aerospork-cli before the .app was notarized, so it is already
 # covered -- and a bare Mach-O cannot be stapled anyway, which is the whole reason it moved inside.
+
+if test -n "$app_only"; then
+    echo "--app-only: .release/AeroSpork.app is built, signed and checked. Skipping the zip and the casks."
+    exit 0
+fi
 
 ############
 ### PACK ###
