@@ -76,7 +76,7 @@ aerospork -h;
     | volume set <number>
 
     | workspace [--auto-back-and-forth|--fail-if-noop]... <workspace> [--auto-back-and-forth|--fail-if-noop]...
-    | workspace [--wrap-around] (next|prev) [--wrap-around]
+    | workspace [--wrap-around|--skip-empty]... (next|prev) [--wrap-around|--skip-empty]...
 
     | workspace-back-and-forth
 

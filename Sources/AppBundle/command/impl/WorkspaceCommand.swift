@@ -17,6 +17,7 @@ struct WorkspaceCommand: Command {
                     wrapAround: args.wrapAround,
                     stdin: io.readStdin(),
                     target: target,
+                    skipEmpty: args.skipEmpty,
                 )
                 guard let workspace else { return false }
                 workspaceName = workspace.name
@@ -34,15 +35,18 @@ struct WorkspaceCommand: Command {
     }
 }
 
-@MainActor func getNextPrevWorkspace(current: Workspace, isNext: Bool, wrapAround: Bool, stdin: String, target: LiveFocus) -> Workspace? {
+/// `skipEmpty` (`workspace --skip-empty next|prev`) leaves out the workspaces with no windows, except the
+/// one you start from, which the index is taken from.
+@MainActor func getNextPrevWorkspace(current: Workspace, isNext: Bool, wrapAround: Bool, stdin: String, target: LiveFocus, skipEmpty: Bool = false) -> Workspace? {
     let stdinWorkspaces: [String] = stdin.split(separator: "\n").map { String($0).trim() }.filter { !$0.isEmpty }
     let currentMonitor = current.workspaceMonitor
-    let workspaces: [Workspace] = stdinWorkspaces.isEmpty
+    let workspaces: [Workspace] = (stdinWorkspaces.isEmpty
         ? Workspace.all.filter { $0.workspaceMonitor.rect.topLeftCorner == currentMonitor.rect.topLeftCorner }
             .toSet()
             .union([current])
             .sorted()
-        : stdinWorkspaces.map { Workspace.get(byName: $0) }
+        : stdinWorkspaces.map { Workspace.get(byName: $0) })
+        .filter { !skipEmpty || $0 == target.workspace || !$0.isEffectivelyEmpty }
     let index = workspaces.firstIndex(where: { $0 == target.workspace }) ?? 0
     let workspace: Workspace? = if wrapAround {
         workspaces.get(wrappingIndex: isNext ? index + 1 : index - 1)

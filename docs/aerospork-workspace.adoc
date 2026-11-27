@@ -10,7 +10,7 @@ include::util/man-attributes.adoc[]
 [verse]
 // tag::synopsis[]
 aerospork workspace [-h|--help] [--auto-back-and-forth] [--fail-if-noop] <workspace>
-aerospork workspace [-h|--help] [--wrap-around] (next|prev)
+aerospork workspace [-h|--help] [--wrap-around] [--skip-empty] (next|prev)
 
 // end::synopsis[]
 
@@ -35,6 +35,7 @@ include::util/conditional-options-header.adoc[]
 
 -h, --help:: Print help and exit.
 --wrap-around:: With `next` or `prev`, go on from the last workspace to the first, and the reverse.
+--skip-empty:: With `next` or `prev`, leave the workspaces that have no windows out of the list.
 
 --auto-back-and-forth::
 When `<workspace>` is already focused, go to the previous workspace instead, as `workspace-back-and-forth` does.
@@ -60,7 +61,7 @@ With `--fail-if-noop`, `workspace` also exits 1 when `<workspace>` is already fo
 include::util/conditional-examples-header.adoc[]
 
 * Go to the next workspace that has windows, on the focused monitor: +
-`aerospork list-workspaces --monitor focused --empty no | aerospork workspace next`
+`aerospork workspace --skip-empty next`
 * Switch workspaces with bindings, and press the same key again to go back:
 +
 [source,toml]

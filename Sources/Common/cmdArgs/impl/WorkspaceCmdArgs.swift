@@ -8,6 +8,7 @@ public struct WorkspaceCmdArgs: CmdArgs {
         options: [
             "--auto-back-and-forth": optionalTrueBoolFlag(\._autoBackAndForth),
             "--wrap-around": optionalTrueBoolFlag(\._wrapAround),
+            "--skip-empty": optionalTrueBoolFlag(\._skipEmpty),
             "--fail-if-noop": trueBoolFlag(\.failIfNoop),
         ],
         arguments: [newArgParser(\.target, parseWorkspaceTarget, mandatoryArgPlaceholder: workspaceTargetPlaceholder)],
@@ -19,11 +20,13 @@ public struct WorkspaceCmdArgs: CmdArgs {
     public var _autoBackAndForth: Bool?
     public var failIfNoop: Bool = false
     public var _wrapAround: Bool?
+    public var _skipEmpty: Bool?
 }
 
 public func parseWorkspaceCmdArgs(_ args: [String]) -> ParsedCmd<WorkspaceCmdArgs> {
     parseSpecificCmdArgs(WorkspaceCmdArgs(rawArgs: args), args)
         .filter("--wrap-around requires using \(NextPrev.unionLiteral) argument") { ($0._wrapAround != nil).implies($0.target.val.isRelatve) }
+        .filter("--skip-empty requires using \(NextPrev.unionLiteral) argument") { ($0._skipEmpty != nil).implies($0.target.val.isRelatve) }
         .filterNot("--auto-back-and-forth is incompatible with \(NextPrev.unionLiteral)") { $0._autoBackAndForth != nil && $0.target.val.isRelatve }
         .filterNot("--fail-if-noop is incompatible with \(NextPrev.unionLiteral)") { $0.failIfNoop && $0.target.val.isRelatve }
         .filterNot("--fail-if-noop is incompatible with --auto-back-and-forth") { $0.autoBackAndForth && $0.failIfNoop }
@@ -31,6 +34,7 @@ public func parseWorkspaceCmdArgs(_ args: [String]) -> ParsedCmd<WorkspaceCmdArg
 
 extension WorkspaceCmdArgs {
     public var wrapAround: Bool { _wrapAround ?? false }
+    public var skipEmpty: Bool { _skipEmpty ?? false }
     public var autoBackAndForth: Bool { _autoBackAndForth ?? false }
 }
 
