@@ -120,6 +120,9 @@ struct Config: ConvenienceCopyable {
     /// A new window of an app that already has windows on another workspace opens on that workspace,
     /// not the focused one. See `workspaceToFollowApp`.
     var newWindowsFollowApp: Bool = false
+    /// The menu bar shows a chip for every workspace, not only the visible one per monitor.
+    /// See `trayItemsForAllWorkspaces`.
+    var menuBarShowsAllWorkspaces: Bool = false
 
     /// Where the app is visible from. Defaults match what the bundle's `LSUIElement` used to hard
     /// code: menu bar yes, Dock no. See `AppVisibility` for why they cannot both be off.

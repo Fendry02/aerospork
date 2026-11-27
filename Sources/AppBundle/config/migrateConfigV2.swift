@@ -197,6 +197,7 @@ private func compactRanges(_ names: [String]) -> [String] {
         a.accordionPadding == b.accordionPadding &&
         a.autoMoveWorkspacesOnMonitorConnect == b.autoMoveWorkspacesOnMonitorConnect &&
         a.newWindowsFollowApp == b.newWindowsFollowApp &&
+        a.menuBarShowsAllWorkspaces == b.menuBarShowsAllWorkspaces &&
         a.gaps == b.gaps &&
         a.keyMapping == b.keyMapping &&
         a.execConfig == b.execConfig &&

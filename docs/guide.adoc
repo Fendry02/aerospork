@@ -304,6 +304,24 @@ workspace only when AeroSpork starts and let it move freely afterwards, add
 
 In the Settings window, the option is "Open new windows where their app is", in the General pane.
 
+[#menu-bar-shows-all-workspaces]
+==== See every workspace in the menu bar
+
+The menu bar shows the visible workspace of each monitor. To see all your workspaces at once, set:
+
+[source,toml]
+----
+menu-bar-shows-all-workspaces = true
+----
+
+The menu bar then shows a chip for each workspace, in the order that `workspace next` uses:
+
+* A filled chip is the focused workspace.
+* An outlined chip has windows in it. It is brighter when it is visible on another monitor.
+* A faint chip without an outline is empty.
+
+In the Settings window, the option is "Show every workspace in the menu bar", in the General pane.
+
 [#binding-modes]
 === Add a binding mode
 
@@ -1011,6 +1029,7 @@ The other built-in defaults:
 |`enable-normalization-opposite-orientation-for-nested-containers` |`true` |no
 |`auto-move-workspaces-on-monitor-connect` |`true` |no
 |`new-windows-follow-app` |`false` |commented out
+|`menu-bar-shows-all-workspaces` |`false` |commented out
 |`automatically-unhide-macos-hidden-apps` |`false` |no
 |`show-menu-bar-icon` |`true` |no
 |`show-dock-icon` |`false` |no

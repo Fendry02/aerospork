@@ -194,6 +194,7 @@ extension [Command] {
         "automatically-unhide-macos-hidden-apps": flag(config.automaticallyUnhideMacosHiddenApps),
         "auto-move-workspaces-on-monitor-connect": flag(config.autoMoveWorkspacesOnMonitorConnect),
         "new-windows-follow-app": flag(config.newWindowsFollowApp),
+        "menu-bar-shows-all-workspaces": flag(config.menuBarShowsAllWorkspaces),
         "enable-normalization-flatten-containers": flag(config.enableNormalizationFlattenContainers),
         "enable-normalization-opposite-orientation-for-nested-containers":
             flag(config.enableNormalizationOppositeOrientationForNestedContainers),

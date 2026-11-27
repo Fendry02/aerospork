@@ -374,7 +374,7 @@ final class ConfigurationWriterSafetyTest: XCTestCase {
     /// them has to survive being written and read back.
     func testEveryScalarKeyRoundTrips() {
         let table = ConfigurationViewModel.Settings.scalarKeys
-        assertEquals(table.count, 15)
+        assertEquals(table.count, 16)
         assertEquals(Set(table.map(\.key)).count, table.count)
         XCTAssertTrue(Set(table.map(\.key)).isSubset(of: configParserKeys))
 
@@ -388,6 +388,7 @@ final class ConfigurationWriterSafetyTest: XCTestCase {
         edited.general.enableNormalizationOppositeOrientation = false
         edited.general.autoMoveWorkspacesOnMonitorConnect = false
         edited.general.newWindowsFollowApp = true
+        edited.general.menuBarShowsAllWorkspaces = true
         edited.general.showMenuBarIcon = false
         edited.general.showDockIcon = true
         edited.callbacks.afterStartup = [.init(command: "focus left")]

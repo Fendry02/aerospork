@@ -104,9 +104,11 @@ struct AppVisibility: Equatable {
         return WorkspaceViewModel(name: $0.name, suffix: suffix, isFocused: focus.workspace == $0)
     }
     setIfChanged(\.workspaces, workspaces)
-    var items = sortedMonitors.map {
-        TrayItem(type: .workspace, name: $0.activeWorkspace.name, isActive: $0.activeWorkspace == focus.workspace)
-    }
+    var items = config.menuBarShowsAllWorkspaces
+        ? trayItemsForAllWorkspaces(Workspace.all, focused: focus.workspace)
+        : sortedMonitors.map {
+            TrayItem(type: .workspace, name: $0.activeWorkspace.name, isActive: $0.activeWorkspace == focus.workspace)
+        }
     let mode = activeMode?.takeIf { $0 != mainModeId }?.first.map { TrayItem(type: .mode, name: $0.uppercased(), isActive: true) }
     if let mode {
         items.insert(mode, at: 0)
@@ -127,9 +129,47 @@ enum TrayItemType: String, Hashable {
     case workspace
 }
 
+/// How a chip is drawn. Without `menu-bar-shows-all-workspaces` only `.focused` and `.visible` occur:
+/// one chip per monitor.
+enum TrayItemLook: Hashable {
+    /// Filled: the focused workspace, or the active binding mode.
+    case focused
+    /// Outlined: on screen on another monitor.
+    case visible
+    /// Outlined and dimmer: off screen, with windows in it.
+    case occupied
+    /// No outline, faint: off screen and empty.
+    case empty
+}
+
 struct TrayItem: Hashable, Identifiable {
     let type: TrayItemType
     let name: String
-    let isActive: Bool
+    let look: TrayItemLook
+    var isActive: Bool { look == .focused }
     var id: String { type.rawValue + name }
+
+    init(type: TrayItemType, name: String, look: TrayItemLook) {
+        self.type = type
+        self.name = name
+        self.look = look
+    }
+
+    init(type: TrayItemType, name: String, isActive: Bool) {
+        self.init(type: type, name: name, look: isActive ? .focused : .visible)
+    }
+}
+
+/// `menu-bar-shows-all-workspaces`: a chip for every workspace, in the order `workspace next` walks
+/// them, so you can see where your windows are without switching.
+@MainActor func trayItemsForAllWorkspaces(_ workspaces: [Workspace], focused: Workspace) -> [TrayItem] {
+    workspaces.sorted().map { workspace in
+        let look: TrayItemLook = switch () {
+            case _ where workspace == focused: .focused
+            case _ where workspace.isVisible: .visible
+            case _ where workspace.allLeafWindowsRecursive.isEmpty: .empty
+            default: .occupied
+        }
+        return TrayItem(type: .workspace, name: workspace.name, look: look)
+    }
 }

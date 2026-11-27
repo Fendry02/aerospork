@@ -110,6 +110,9 @@ backspace = ["close-all-windows-but-current", "mode main"]
 # link opened from elsewhere) opens on that workspace instead of the focused one:
 # new-windows-follow-app = false
 #
+# Show a chip for every workspace in the menu bar, not only the visible one:
+# menu-bar-shows-all-workspaces = false
+#
 # Run something after AeroSpork starts:
 # after-startup-command = ["exec-and-forget sketchybar --reload"]
 #

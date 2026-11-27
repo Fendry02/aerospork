@@ -446,7 +446,10 @@ The menu bar extra is `MenuBar.swift` and `MenuBarLabel.swift`. The menu is a re
 control panel: go to a workspace, leave a binding mode, pause tiling, open Settings, quit. Everything
 that is configuration is in Settings, so the menu has no "Reload config" or "Open config" item.
 
-The label shows a chip for the visible workspace on each monitor and marks the focused one.
+The label shows a chip for the visible workspace on each monitor and marks the focused one. With
+`menu-bar-shows-all-workspaces`, it shows a chip for every workspace instead, in `workspace next`
+order, and `TrayItemLook` tells the focused, visible, occupied and empty ones apart
+(`MenuBarAllWorkspacesTest`).
 `ImageRenderer` draws the chips at 40 pt and scales them down. The label does not use the
 `N.square.fill` SF Symbols, which exist only for 0 to 50 and single capital letters, so a workspace
 named `web` would look nothing like one named `3`. The label follows the appearance of the menu bar,

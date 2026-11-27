@@ -658,6 +658,7 @@ extension ConfigurationViewModel {
             var enableNormalizationOppositeOrientation = true
             var autoMoveWorkspacesOnMonitorConnect = true
             var newWindowsFollowApp = false
+            var menuBarShowsAllWorkspaces = false
             var showMenuBarIcon = true
             var showDockIcon = false
         }
@@ -733,6 +734,7 @@ extension ConfigurationViewModel.Settings {
         .bool("automatically-unhide-macos-hidden-apps", \.general.automaticallyUnhideMacosHiddenApps, \.automaticallyUnhideMacosHiddenApps),
         .bool("auto-move-workspaces-on-monitor-connect", \.general.autoMoveWorkspacesOnMonitorConnect, \.autoMoveWorkspacesOnMonitorConnect),
         .bool("new-windows-follow-app", \.general.newWindowsFollowApp, \.newWindowsFollowApp),
+        .bool("menu-bar-shows-all-workspaces", \.general.menuBarShowsAllWorkspaces, \.menuBarShowsAllWorkspaces),
         .bool("show-menu-bar-icon", \.general.showMenuBarIcon, \.showMenuBarIcon),
         .bool("show-dock-icon", \.general.showDockIcon, \.showDockIcon),
         .bool("enable-normalization-flatten-containers", \.general.enableNormalizationFlattenContainers, \.enableNormalizationFlattenContainers),

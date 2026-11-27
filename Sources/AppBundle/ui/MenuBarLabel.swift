@@ -74,21 +74,27 @@ struct MenuBarLabel: View {
                 .font(.system(size: height * 0.62, weight: .semibold, design: .rounded))
                 .padding(.horizontal, radius * 0.9)
                 .frame(height: height)
-            if item.isActive {
-                ZStack {
-                    label.background { RoundedRectangle(cornerRadius: radius, style: .continuous) }
-                    label.blendMode(.destinationOut) // knock the glyphs out of the fill
-                }
-                .compositingGroup()
-                .foregroundStyle(ink)
-            } else {
-                label
-                    .background {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .strokeBorder(lineWidth: border)
+            switch item.look {
+                case .focused:
+                    ZStack {
+                        label.background { RoundedRectangle(cornerRadius: radius, style: .continuous) }
+                        label.blendMode(.destinationOut) // knock the glyphs out of the fill
                     }
+                    .compositingGroup()
                     .foregroundStyle(ink)
-                    .opacity(0.75)
+                case .visible, .occupied:
+                    label
+                        .background {
+                            RoundedRectangle(cornerRadius: radius, style: .continuous)
+                                .strokeBorder(lineWidth: border)
+                        }
+                        .foregroundStyle(ink)
+                        .opacity(item.look == .visible ? 0.75 : 0.5)
+                case .empty:
+                    // No outline, so the eye skips it: there is nothing there to switch to.
+                    label
+                        .foregroundStyle(ink)
+                        .opacity(0.3)
             }
         }
     }

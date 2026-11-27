@@ -27,6 +27,9 @@ struct GeneralSettingsTab: View {
             Section {
                 Toggle("Show icon in the menu bar", isOn: viewModel.binding(\.settings.general.showMenuBarIcon))
                     .help("The workspace chips, and the menu with workspace switching and Settings in it")
+                Toggle("Show every workspace in the menu bar", isOn: viewModel.binding(\.settings.general.menuBarShowsAllWorkspaces))
+                    .help("A chip for each workspace instead of only the visible one: filled where you are, outlined where there are windows, faint where it is empty")
+                    .disabled(!viewModel.settings.general.showMenuBarIcon)
                 // Shows the *effective* value, which is not always the stored one: with the menu bar
                 // icon off, `AppVisibility` forces the Dock icon on so Settings stays reachable.
                 Toggle("Show icon in the Dock", isOn: Binding(
