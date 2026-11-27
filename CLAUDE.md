@@ -87,7 +87,8 @@ One line each, the rest:
   registration asks. Startup saves never prune. The file lives in `~/Library/Caches`, never `/tmp`.
   `WorkspaceMemoryTest`.
 - Refresh: fixed 50 ms debounce, at most one running and one waiting. An event never cancels a running refresh,
-  a session does. Sessions go one at a time through `sessionGate` and none awaits another. `RefreshSchedulerTest`.
+  a session does. Sessions go one at a time through `sessionGate` and none awaits another. A session past the
+  10 s deadline stops holding refreshes back. `RefreshSchedulerTest`.
 - `MacApp.setFrame` skips writes when the frame already matches. `AxWriteTest`.
 - Monitor matching checks `uuid` first. DisplayLink has no EDID, so `uuid` is the only pin. Sizes are points.
   `MonitorFingerprintTest`.

@@ -79,14 +79,14 @@ final class RefreshSchedulerTest: XCTestCase {
         scheduler.request(request())
         await until { recorder.started.count == 1 }
 
-        scheduler.sessionWillStart()
+        let session = scheduler.sessionWillStart()
         await until { recorder.cancelled == 1 }
         scheduler.request(request())
         try? await Task.sleep(for: .milliseconds(30))
         assertEquals(recorder.started.count, 1) // nothing starts underneath a session
 
         recorder.hold = false
-        scheduler.sessionDidEnd()
+        scheduler.sessionDidEnd(session)
         await until { recorder.started.count == 2 && recorder.finished == 1 }
     }
 
@@ -95,10 +95,10 @@ final class RefreshSchedulerTest: XCTestCase {
         let recorder = Recorder()
         let scheduler = scheduler(recorder)
         scheduler.request(request(unlocked: true))
-        scheduler.sessionWillStart()
+        let session = scheduler.sessionWillStart()
         try? await Task.sleep(for: .milliseconds(30))
         assertEquals(recorder.started.count, 0)
-        scheduler.sessionDidEnd()
+        scheduler.sessionDidEnd(session)
         await until { recorder.finished == 1 }
         assertEquals(recorder.started[0].screenIsDefinitelyUnlocked, true)
     }
@@ -113,6 +113,30 @@ final class RefreshSchedulerTest: XCTestCase {
         recorder.hold = false
         scheduler.request(request())
         await until { recorder.started.count == 2 }
+    }
+
+    /// After sleep, a session whose await never came back kept a counter above zero, and no refresh
+    /// ever ran again: windows lost during sleep stayed lost and workspace switches moved nothing.
+    func testASessionThatNeverEndsDoesNotEndRefreshesForGood() async {
+        let recorder = Recorder()
+        let scheduler = scheduler(recorder, abandonAfter: .milliseconds(20))
+        _ = scheduler.sessionWillStart() // never ends
+        scheduler.request(request(unlocked: true))
+        try? await Task.sleep(for: .milliseconds(5))
+        assertEquals(recorder.started.count, 0) // still held back while the session may be merely slow
+        await until { recorder.finished == 1 } // with no other event to restart it
+        assertEquals(recorder.started[0].screenIsDefinitelyUnlocked, true)
+    }
+
+    func testAWedgedSessionDoesNotHoldBackRefreshesAfterALaterSessionEnds() async {
+        let recorder = Recorder()
+        let scheduler = scheduler(recorder, abandonAfter: .milliseconds(20))
+        _ = scheduler.sessionWillStart() // never ends
+        try? await Task.sleep(for: .milliseconds(30))
+        let later = scheduler.sessionWillStart()
+        scheduler.request(request())
+        scheduler.sessionDidEnd(later)
+        await until { recorder.finished == 1 }
     }
 
     // MARK: - Sessions run one at a time

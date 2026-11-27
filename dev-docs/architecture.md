@@ -284,6 +284,18 @@ item 8). A session that waited for another session would deadlock on `sessionGat
 
 **Test.** `RefreshSchedulerTest`, including `testNoCommandStartsANestedSession`.
 
+**Rule.** `RefreshScheduler` holds back refreshes only for sessions younger than its deadline (10 s).
+`sessionWillStart` returns a token that `sessionDidEnd` hands back, and a session past the deadline
+counts as wedged and stops holding refreshes back. **Reason.** It was a counter. After a wake from
+sleep, an app that stopped answering left a session that never reached `sessionDidEnd`. `sessionGate`
+let the next session in, but the counter stayed above zero for the life of the process, so no refresh
+ever ran again: windows lost during sleep never came back, and workspace switches moved nothing.
+**Test.** `RefreshSchedulerTest.testASessionThatNeverEndsDoesNotEndRefreshesForGood`.
+
+`GlobalObserver` also asks for a refresh on wake, when the screens wake, when the session becomes
+active and when the screen is unlocked, then again 2 s and 6 s later, because apps can take seconds
+to answer Accessibility after a wake.
+
 **Rule.** `MacApp.setFrame` skips the Accessibility writes when a window already has the target
 frame. **Reason.** Each write costs a round trip to the app, and a redundant write redraws the frame
 buffer, which is slow over DisplayLink and USB. **Test.** `AxWriteTest`.
@@ -447,6 +459,11 @@ second. **Test.** `PerfInvariantsTest.testTrayDoesNotPublishWhenNothingChanged`.
 ## In-app updates
 
 `ui/Updater.swift` wraps `SPUStandardUpdaterController` from Sparkle.
+
+**This fork:** `Updater.takesOfficialUpdates` is `false`, so the updater never starts and the menu has
+no update item. An official update replaces the whole app and would remove the fixes this fork
+carries. Upstream changes come in by merging their code. The feed keys stay in `Info.plist` because
+`build-release.sh` refuses a release without them.
 
 **Rule.** Set `SUFeedURL` and `SUPublicEDKey` in the `info:` `properties:` block of `project.yml`,
 never through `INFOPLIST_KEY_*`. **Reason.** Xcode supports that prefix only for keys it knows, and

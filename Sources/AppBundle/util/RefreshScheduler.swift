@@ -34,7 +34,15 @@ final class RefreshScheduler {
     private var timer: Task<Void, Never>?
     private var running: (id: Int, task: Task<Void, Never>, since: ContinuousClock.Instant)?
     private var nextRunId = 0
-    private var sessionsInFlight = 0
+    /// Start time of each session that has not ended, by the token `sessionWillStart` handed out.
+    ///
+    /// Not a counter. A session whose await never comes back -- an app that stops answering, typically
+    /// right after the Mac wakes from sleep -- never reaches its `sessionDidEnd`. `sessionGate` lets the
+    /// next session in after its deadline, but a counter stayed above zero for the life of the process,
+    /// and with it no refresh ever started again: windows that went away during sleep never came back,
+    /// new windows were never detected, and every workspace switch moved nothing on screen.
+    private var sessionsInFlight: [Int: ContinuousClock.Instant] = [:]
+    private var nextSessionId = 0
 
     init(delay: Duration = .milliseconds(50), abandonAfter: Duration = .seconds(10), run: @escaping @MainActor (RefreshRequest) async -> Void) {
         self.delay = delay
@@ -50,22 +58,45 @@ final class RefreshScheduler {
     /// For quitting: what is already running must not write another frame.
     func cancelRunningRefresh() { running?.task.cancel() }
 
-    func sessionWillStart() {
-        sessionsInFlight += 1
+    /// Pass the returned token to `sessionDidEnd`.
+    func sessionWillStart() -> Int {
+        let id = nextSessionId
+        nextSessionId &+= 1
+        sessionsInFlight[id] = .now
         timer?.cancel()
         timer = nil
         running?.task.cancel()
+        return id
     }
 
-    func sessionDidEnd() {
-        sessionsInFlight -= 1
+    func sessionDidEnd(_ id: Int) {
+        sessionsInFlight.removeValue(forKey: id)
         if pending != nil { restartTimer() }
+    }
+
+    /// Same deadline as a refresh and as `sessionGate`: past it, a session is wedged, not slow.
+    private func forgetWedgedSessions() {
+        let now = ContinuousClock.now
+        let wedged = sessionsInFlight.filter { now - $0.value > abandonAfter }.keys
+        if wedged.isEmpty { return }
+        AppLog.session.error("ignoring \(wedged.count, privacy: .public) session(s) that did not finish in time")
+        for id in wedged { sessionsInFlight.removeValue(forKey: id) }
     }
 
     private func restartTimer() {
         timer?.cancel()
         timer = nil
-        if sessionsInFlight > 0 { return } // `sessionDidEnd` restarts it
+        forgetWedgedSessions()
+        if let oldest = sessionsInFlight.values.min() {
+            // `sessionDidEnd` restarts it. This wakes up only for a session that never ends.
+            timer = Task { [abandonAfter] in
+                try? await Task.sleep(until: oldest + abandonAfter + .milliseconds(1), clock: .continuous)
+                if Task.isCancelled { return }
+                timer = nil
+                restartTimer()
+            }
+            return
+        }
         timer = Task { [delay] in
             try? await Task.sleep(for: delay)
             if Task.isCancelled { return }
@@ -83,7 +114,7 @@ final class RefreshScheduler {
             stale.task.cancel()
             running = nil
         }
-        guard sessionsInFlight == 0, running == nil, let request = pending else { return }
+        guard sessionsInFlight.isEmpty, running == nil, let request = pending else { return }
         pending = nil
         let id = nextRunId
         nextRunId &+= 1

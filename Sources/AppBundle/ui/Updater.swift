@@ -29,8 +29,13 @@ final class Updater {
     /// Info.plist somehow lost the key, which is worth surfacing rather than failing silently.
     let isEnabled: Bool
 
+    /// Off in this fork. An official update replaces the whole app, so it would silently remove the
+    /// fixes this fork carries. Take upstream's changes by merging their code instead. The feed keys
+    /// stay in Info.plist because `build-release.sh` refuses a release without them.
+    static let takesOfficialUpdates = false
+
     private init() {
-        isEnabled = Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil
+        isEnabled = Updater.takesOfficialUpdates && Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil
     }
 
     func start() {

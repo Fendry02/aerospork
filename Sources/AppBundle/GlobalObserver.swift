@@ -65,6 +65,23 @@ class GlobalObserver {
             }
         }
 
+        // Sleep and the lock screen. A wake used to be noticed only through the screen parameters
+        // changing, and while the screen is locked the lock screen app answers for every window, so
+        // the refresh that ran then could not see the user's windows. Ask again once the session is
+        // back, and again a little later: apps can take seconds to answer Accessibility after a wake.
+        nc.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
+            Task { @MainActor in onWakeOrUnlock("didWake", screenIsDefinitelyUnlocked: false) }
+        }
+        nc.addObserver(forName: NSWorkspace.screensDidWakeNotification, object: nil, queue: .main) { _ in
+            Task { @MainActor in onWakeOrUnlock("screensDidWake", screenIsDefinitelyUnlocked: false) }
+        }
+        nc.addObserver(forName: NSWorkspace.sessionDidBecomeActiveNotification, object: nil, queue: .main) { _ in
+            Task { @MainActor in onWakeOrUnlock("sessionDidBecomeActive", screenIsDefinitelyUnlocked: false) }
+        }
+        DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { _ in
+            Task { @MainActor in onWakeOrUnlock("screenIsUnlocked", screenIsDefinitelyUnlocked: true) }
+        }
+
         NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { _ in
             runDetached("didActivateApp") {
                 guard let token: RunSessionGuard = .isServerEnabled else { return }
@@ -85,6 +102,14 @@ class GlobalObserver {
                 }
             }
         }
+    }
+
+    @MainActor
+    private static func onWakeOrUnlock(_ reason: String, screenIsDefinitelyUnlocked: Bool) {
+        if !TrayMenuModel.shared.isEnabled { return }
+        runRefreshSession(.globalObserver(reason), screenIsDefinitelyUnlocked: screenIsDefinitelyUnlocked)
+        scheduleFollowUpRefresh(after: 2, "\(reason)FollowUp")
+        scheduleFollowUpRefresh(after: 6, "\(reason)FollowUp")
     }
 
     // DisplayLink docks fire didChangeScreenParametersNotification in bursts during a single
