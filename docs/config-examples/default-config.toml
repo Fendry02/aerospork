@@ -106,6 +106,10 @@ backspace = ["close-all-windows-but-current", "mode main"]
 # default-root-container-layout = "tiles"       # tiles | accordion
 # default-root-container-orientation = "auto"   # auto | horizontal | vertical
 #
+# A new window of an app that already has windows on another workspace (a popup, a dialog, a
+# link opened from elsewhere) opens on that workspace instead of the focused one:
+# new-windows-follow-app = false
+#
 # Run something after AeroSpork starts:
 # after-startup-command = ["exec-and-forget sketchybar --reload"]
 #

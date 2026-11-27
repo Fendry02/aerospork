@@ -279,6 +279,31 @@ To do the same in the Settings window:
 
 To match by app name, window title or workspace, see <<on-window-detected-callback>>.
 
+[#new-windows-follow-app]
+==== Keep an app's new windows beside it
+
+A rule sends every window of an app to one fixed workspace. When you move an app by hand instead,
+its next windows still open on the workspace you are looking at: a sign-in popup, a dialog, or a
+link opened from another app. To make them open where the app is, set:
+
+[source,toml]
+----
+new-windows-follow-app = true
+----
+
+AeroSpork then places a new window like this:
+
+* The app's first window opens on the focused workspace, as usual. Window rules still apply to it.
+* When the app already has a window on the focused workspace, the new window opens there too. An
+  app that you use on several workspaces, such as Finder or a terminal, keeps opening where you are.
+* Otherwise the new window opens on the workspace of the app's window that had focus last.
+
+A window rule runs after this, so a rule that moves the window still wins. To send an app to a
+workspace only when AeroSpork starts and let it move freely afterwards, add
+`if.during-aerospork-startup = true` to the rule. See <<on-window-detected-callback>>.
+
+In the Settings window, the option is "Open new windows where their app is", in the General pane.
+
 [#binding-modes]
 === Add a binding mode
 
@@ -985,6 +1010,7 @@ The other built-in defaults:
 |`enable-normalization-flatten-containers` |`true` |no
 |`enable-normalization-opposite-orientation-for-nested-containers` |`true` |no
 |`auto-move-workspaces-on-monitor-connect` |`true` |no
+|`new-windows-follow-app` |`false` |commented out
 |`automatically-unhide-macos-hidden-apps` |`false` |no
 |`show-menu-bar-icon` |`true` |no
 |`show-dock-icon` |`false` |no

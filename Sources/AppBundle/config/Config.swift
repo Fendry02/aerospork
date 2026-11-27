@@ -117,6 +117,9 @@ struct Config: ConvenienceCopyable {
     /// force-assigned name. See `Workspace.garbageCollectUnusedWorkspaces`.
     var persistentWorkspaces: Set<String> = []
     var autoMoveWorkspacesOnMonitorConnect: Bool = true
+    /// A new window of an app that already has windows on another workspace opens on that workspace,
+    /// not the focused one. See `workspaceToFollowApp`.
+    var newWindowsFollowApp: Bool = false
 
     /// Where the app is visible from. Defaults match what the bundle's `LSUIElement` used to hard
     /// code: menu bar yes, Dock no. See `AppVisibility` for why they cannot both be off.

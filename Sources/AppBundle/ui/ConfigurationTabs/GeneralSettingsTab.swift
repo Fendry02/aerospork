@@ -16,6 +16,8 @@ struct GeneralSettingsTab: View {
                     .help("Undo ⌘H automatically, so hidden windows keep tiling")
                 Toggle("Move workspaces to assigned monitors on connect", isOn: viewModel.binding(\.settings.general.autoMoveWorkspacesOnMonitorConnect))
                     .help("Plug in a dock and your pinned workspaces go back to the monitors you assigned them. Off, they stay wherever they landed when the monitor went away.")
+                Toggle("Open new windows where their app is", isOn: viewModel.binding(\.settings.general.newWindowsFollowApp))
+                    .help("A popup, a dialog or another window of an app you use on another workspace opens there, not on the workspace you are looking at. An app's first window still opens where you are.")
             } header: {
                 SectionLabel("Startup & behaviour", "power")
             } footer: {

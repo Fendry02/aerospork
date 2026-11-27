@@ -148,6 +148,7 @@ private let configParser: [String: any ParserProtocol<Config>] = [
     "workspace-to-monitor-force-assignment": Parser(\.workspaceToMonitorForceAssignment, parseWorkspaceToMonitorAssignment),
     "on-window-detected": Parser(\.onWindowDetected, parseOnWindowDetectedArray),
     "auto-move-workspaces-on-monitor-connect": Parser(\.autoMoveWorkspacesOnMonitorConnect, parseBool),
+    "new-windows-follow-app": Parser(\.newWindowsFollowApp, parseBool),
     "show-menu-bar-icon": Parser(\.showMenuBarIcon, parseBool),
     "show-dock-icon": Parser(\.showDockIcon, parseBool),
 

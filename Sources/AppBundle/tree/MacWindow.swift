@@ -39,7 +39,7 @@ final class MacWindow: Window {
         // workspace like `A` can never be.
         let remembered = WorkspaceMemory.restoredWorkspace(forWindowId: windowId, bundleId: macApp.bundleId)
         let workspace = remembered
-            ?? (isStartup ? (rect?.center.monitorApproximation ?? mainMonitor).activeWorkspace : focus.workspace)
+            ?? (isStartup ? (rect?.center.monitorApproximation ?? mainMonitor).activeWorkspace : workspaceForNewWindow(of: macApp))
         var data = try await unbindAndGetBindingDataForNewWindow(windowId, macApp, workspace, window: nil)
 
         // atomic synchronous section
@@ -77,6 +77,18 @@ final class MacWindow: Window {
             scheduleFollowUpRefresh(after: 3, "popupRecheck") { window.isPopup }
         }
         return window
+    }
+
+    /// The focused workspace, unless `new-windows-follow-app` sends the window to its app; see `workspaceToFollowApp`.
+    @MainActor
+    private static func workspaceForNewWindow(of macApp: MacApp) -> Workspace {
+        guard config.newWindowsFollowApp else { return focus.workspace }
+        let appWindows = allWindowsMap.values.filter { $0.app.pid == macApp.pid }
+        return workspaceToFollowApp(
+            appWindows: appWindows,
+            focusedWorkspace: focus.workspace,
+            lastFocusedWindowId: lastFocusedWindowIdByPid[macApp.pid],
+        ) ?? focus.workspace
     }
 
     @MainActor

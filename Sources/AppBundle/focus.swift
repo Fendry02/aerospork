@@ -107,8 +107,13 @@ struct FrozenFocus: AeroAny, Equatable, Sendable {
     let status = newFocus.workspace.workspaceMonitor.setActiveWorkspace(newFocus.workspace)
 
     newFocus.windowOrNil?.markAsMostRecentChild()
+    if let window = newFocus.windowOrNil { lastFocusedWindowIdByPid[window.app.pid] = window.windowId }
     return status
 }
+
+/// The window of each app that had focus last. Read by `new-windows-follow-app` to send a new window to
+/// where its app is being used. A stale id is harmless: the reader checks the window still exists.
+@MainActor var lastFocusedWindowIdByPid: [Int32: UInt32] = [:]
 extension Window {
     @MainActor func focusWindow() -> Bool {
         if let focus = toLiveFocusOrNil() {

@@ -196,6 +196,7 @@ private func compactRanges(_ names: [String]) -> [String] {
         a.automaticallyUnhideMacosHiddenApps == b.automaticallyUnhideMacosHiddenApps &&
         a.accordionPadding == b.accordionPadding &&
         a.autoMoveWorkspacesOnMonitorConnect == b.autoMoveWorkspacesOnMonitorConnect &&
+        a.newWindowsFollowApp == b.newWindowsFollowApp &&
         a.gaps == b.gaps &&
         a.keyMapping == b.keyMapping &&
         a.execConfig == b.execConfig &&

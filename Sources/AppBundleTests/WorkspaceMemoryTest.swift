@@ -524,7 +524,7 @@ final class WorkspaceMemoryTest: XCTestCase {
             normalised.contains(
                 "let remembered = WorkspaceMemory.restoredWorkspace(forWindowId: windowId, bundleId: macApp.bundleId) "
                     + "let workspace = remembered "
-                    + "?? (isStartup ? (rect?.center.monitorApproximation ?? mainMonitor).activeWorkspace : focus.workspace) "
+                    + "?? (isStartup ? (rect?.center.monitorApproximation ?? mainMonitor).activeWorkspace : workspaceForNewWindow(of: macApp)) "
                     + "var data = try await unbindAndGetBindingDataForNewWindow(windowId, macApp, workspace, window: nil)",
             ),
             """
